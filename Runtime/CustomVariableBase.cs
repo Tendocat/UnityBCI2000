@@ -4,82 +4,70 @@ using System.Reflection;
 using UnityEngine;
 using Object = System.Object;
 
-public abstract class CustomVariableBase : MonoBehaviour //base script for handling custom variables
+namespace UnityBCI2000Runtime
 {
-
-    public List<CustomVariable> customVariables = new List<CustomVariable>();
-    [HideInInspector] public BCI2000StateSender Sender;
-
-    public abstract void AddCustomVariables(); //override with method that adds custom variables to customVariables
-
-
-    private void InitializeList()//Clears and repopulates list, this is because the list is erased on assembly reload
+    [ExecuteInEditMode]
+    public abstract class CustomVariableBase : MonoBehaviour //base script for handling custom variables
     {
-        customVariables.Clear();
-        AddCustomVariables();
-    }
+        public List<CustomVariable> customVariables = null;
 
-
-
-    public void InitializeRuntime() //Custom variables cannot be serialized, so they must be reinitialized whenever assembly is reloaded, before the first frame
-    {
-        InitializeList();
-        foreach (CustomVariable customVar in customVariables) //uses reflection so that there can be one central custom variable list, ths is only called before the scene loads, so overhead doesnt matter.
+        protected abstract void AddCustomVariables(); //override with method that adds custom variables to customVariables
+        
+        void OnEnable() // for editor initialisation (awake only called once)
         {
-            if (customVar is CustomSendVariable)
-                Sender.AddCustomSendVariable(customVar.Name, (Func<float>)Delegate.CreateDelegate(customVar.DelegateType, customVar.Target, customVar.Method), customVar.Scale, customVar.Type);
-            else if (customVar is CustomGetVariable)
-                Sender.AddCustomGetVariable(customVar.Name, (Action<int>)Delegate.CreateDelegate(customVar.DelegateType, customVar.Target, customVar.Method));
+            InitCustomVariables();
         }
-    }
-
-    public void InitializeEditor() //The editor only displays the name of each custom variable
-    {
-        InitializeList();
-        foreach (CustomVariable customVar in customVariables)
+        
+        void Awake()
         {
-            if (customVar is CustomSendVariable)
-                Sender.EditorAddCustomVariable(customVar.Name, false);
-            else
-                Sender.EditorAddCustomVariable(customVar.Name, true);
+            InitCustomVariables();
         }
-    }
-
-    public abstract class CustomVariable
-    {
-        public string Name;
-        public UnityBCI2000.StateType Type;
-        public int Scale;
-        public Type DelegateType;
-        public Object Target;
-        public MethodInfo Method;
-
-
-        public CustomVariable(string name, UnityBCI2000.StateType type, int scale)
+        
+        void InitCustomVariables()
         {
-            Name = name;
-            Type = type;
-            Scale = scale;
+            if (customVariables == null)
+            {
+                customVariables = new List<CustomVariable>();
+                AddCustomVariables();
+            }
         }
-    }
 
-    public class CustomSendVariable : CustomVariable
-    {
-        public CustomSendVariable(string name, Func<float> value, int scale, UnityBCI2000.StateType type) : base(name, type, scale)
+        public abstract class CustomVariable
         {
-            DelegateType = typeof(Func<float>);
-            Target = value.Target;
-            Method = value.Method;
+            public string Name;
+            public UnityBCI2000.StateType Type;
+            public int Scale;
+            public Type DelegateType;
+            public Object Target;
+            public MethodInfo Method;
+
+
+            public CustomVariable(string name, UnityBCI2000.StateType type, int scale)
+            {
+                Name = name;
+                Type = type;
+                Scale = scale;
+            }
         }
-    }
 
-    public class CustomGetVariable : CustomVariable
-    {
-        public CustomGetVariable(string name, Action<int> action) : base(name, UnityBCI2000.StateType.UnsignedInt32, 1)
+        public class CustomSendVariable : CustomVariable
         {
-            DelegateType = typeof(Action<int>);
-            Target = action.Target;
-            Method = action.Method;
+            public CustomSendVariable(string name, Func<float> value, int scale, UnityBCI2000.StateType type) : base(name, type, scale)
+            {
+                DelegateType = typeof(Func<float>);
+                Target = value.Target;
+                Method = value.Method;
+            }
+        }
+
+        public class CustomGetVariable : CustomVariable
+        {
+            public CustomGetVariable(string name, Action<int> action) : base(name, UnityBCI2000.StateType.UnsignedInt32, 1)
+            {
+                DelegateType = typeof(Action<int>);
+                Target = action.Target;
+                Method = action.Method;
+            }
         }
     }
 }
