@@ -138,8 +138,8 @@ namespace UnityBCI2000Runtime
 
         private void OnDestroy()    // also called when OnApplicationQuit
         {
-            bci = null;
             bci.Stop();
+            bci = null;
         }
 
         public bool Execute(string command)
