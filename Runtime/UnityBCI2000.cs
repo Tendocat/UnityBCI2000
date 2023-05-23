@@ -10,7 +10,6 @@ namespace UnityBCI2000Runtime
     public class UnityBCI2000 : MonoBehaviour
     {
         private BCI2000Remote bci = new BCI2000Remote();
-        private BCI2000Application bciApplication;
         public string OperatorPath;
         public string ParametersPath;
         public string TelnetIp;
