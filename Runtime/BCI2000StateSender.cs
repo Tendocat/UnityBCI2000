@@ -6,6 +6,9 @@ using UnityEditor;
 
 namespace UnityBCI2000Runtime
 {
+    /*
+     * This class registers simple GameObject States. It have to be loaded in the same scene as UnityBCI2000
+     */
     public class BCI2000StateSender : MonoBehaviour
     {
         [SerializeField] private GameObject BCIObject;
@@ -39,11 +42,9 @@ namespace UnityBCI2000Runtime
 
         private Camera screenCamera;
 
-        // Start is called before the first frame update
-        void Start()
+        // Awake is called before Start
+        void Awake()
         {
-            if (BCIObject == null)
-                BCIObject = FindAnyObjectByType<UnityBCI2000>().gameObject;
             bci = BCIObject.GetComponent<UnityBCI2000>();
 
             screenCamera = Camera.main;
@@ -116,7 +117,7 @@ namespace UnityBCI2000Runtime
 
         private void InitializeRuntime() //Custom variables cannot be serialized, so they must be reinitialized whenever assembly is reloaded, before the first frame
         {
-            foreach (CustomVariableBase.CustomVariable customVar in customVarsObject.customVariables) //uses reflection so that there can be one central custom variable list, ths is only called before the scene loads, so overhead doesnt matter.
+            foreach (CustomVariableBase.CustomVariable customVar in customVarsObject.CustomVariables) //uses reflection so that there can be one central custom variable list, ths is only called before the scene loads, so overhead doesnt matter.
             {
                 if (customVar is CustomVariableBase.CustomSendVariable)
                     AddCustomSendVariable(customVar.Name, (Func<float>)Delegate.CreateDelegate(customVar.DelegateType, customVar.Target, customVar.Method), customVar.Scale, customVar.Type);
@@ -127,7 +128,6 @@ namespace UnityBCI2000Runtime
 
         public void AddSendState(string name, UnityBCI2000.StateType type, Func<float> value, int scale)
         {
-
             UnityBCI2000.StateVariable state = bci.AddState(GetStateNameNoWS(name), type);
             int scale2 = scale;
             if (type == UnityBCI2000.StateType.Boolean) //scale must be 1 if the value is boolean
@@ -297,7 +297,7 @@ namespace UnityBCI2000Runtime
                     CustomVariableBase customVariables = sender.customVarsObject;
                     if (customVariables != null)
                     {
-                        foreach (CustomVariableBase.CustomVariable customVar in customVariables.customVariables)
+                        foreach (CustomVariableBase.CustomVariable customVar in customVariables.CustomVariables)
                         {
                             if (customVar is CustomVariableBase.CustomSendVariable)
                                 customSendVariables.Add(customVar.Name);

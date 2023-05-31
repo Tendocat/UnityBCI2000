@@ -6,30 +6,28 @@ using Object = System.Object;
 
 namespace UnityBCI2000Runtime
 {
-    [ExecuteInEditMode]
     public abstract class CustomVariableBase : MonoBehaviour //base script for handling custom variables
     {
-        public List<CustomVariable> customVariables = null;
+        public List<CustomVariable> CustomVariables
+        {
+            get
+            {
+                if (customVariables == null)
+                {
+                    InitCustomVariables();
+                }
+                return customVariables;
+            }
+        }
+
+        protected List<CustomVariable> customVariables = null;
 
         protected abstract void AddCustomVariables(); //override with method that adds custom variables to customVariables
         
-        void OnEnable() // for editor initialisation (awake only called once)
+        private void InitCustomVariables()
         {
-            InitCustomVariables();
-        }
-        
-        void Awake()
-        {
-            InitCustomVariables();
-        }
-        
-        void InitCustomVariables()
-        {
-            if (customVariables == null)
-            {
-                customVariables = new List<CustomVariable>();
-                AddCustomVariables();
-            }
+            customVariables = new List<CustomVariable>();
+            AddCustomVariables();
         }
 
         public abstract class CustomVariable
@@ -40,7 +38,6 @@ namespace UnityBCI2000Runtime
             public Type DelegateType;
             public Object Target;
             public MethodInfo Method;
-
 
             public CustomVariable(string name, UnityBCI2000.StateType type, int scale)
             {

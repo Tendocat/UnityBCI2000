@@ -161,6 +161,7 @@ namespace UnityBCI2000Runtime
             private readonly BCI2000Remote bci;
 
             private int lastSentValue;
+            private bool firstSentValue = true;
             public StateVariable(string name, StateType type, BCI2000Remote inBci)
             {
                 Name = name;
@@ -171,9 +172,8 @@ namespace UnityBCI2000Runtime
 
             public void Set(int value)
             {
-                if (value != lastSentValue) //check if the new value is different than the last sent value, to avoid unneccessary calls to bci2k
+                if (firstSentValue || value != lastSentValue) //check if the new value is different than the last sent value, to avoid unneccessary calls to bci2k
                 {
-                    lastSentValue = value;
                     switch (Type)
                     {
                         case StateType.Boolean:
@@ -185,9 +185,9 @@ namespace UnityBCI2000Runtime
                         case StateType.SignedInt16:
                         case StateType.SignedInt32:
                             bci.SetStateVariable(Name, Mathf.Abs(value));
-                            if (value < 0)
+                            if (value < 0 && (lastSentValue > 0 || firstSentValue)) // avoid unneccessary calls to bci2k
                                 bci.SetStateVariable(Name + "Sign", 1);
-                            else
+                            else if (value > 0 && (lastSentValue < 0 || firstSentValue))
                                 bci.SetStateVariable(Name + "Sign", 0);
                             break;
                         case StateType.UnsignedInt16:
@@ -195,6 +195,8 @@ namespace UnityBCI2000Runtime
                             bci.SetStateVariable(Name, value);
                             break;
                     }
+                    lastSentValue = value;
+                    firstSentValue = false;
                 }
             }
             public int Get()
