@@ -56,7 +56,7 @@ namespace UnityBCI2000Runtime
             return (newState);
         }
 
-        void Awake()
+        void Start()
         {                
             bci.WindowVisible = 1;
             if (File.Exists(OperatorPath))
