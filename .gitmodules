@@ -1,0 +1,3 @@
+[submodule "BCI2000RemoteNET"]
+	path = BCI2000RemoteNET
+	url = https://github.com/Tendocat/BCI2000RemoteNET.git
