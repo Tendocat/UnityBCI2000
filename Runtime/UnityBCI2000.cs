@@ -144,7 +144,8 @@ namespace UnityBCI2000Runtime
 
         private void OnDestroy()    // also called when OnApplicationQuit
         {
-            bci.Stop();
+            if (bci != null)
+                bci.Stop();
             bci = null;
         }
 
