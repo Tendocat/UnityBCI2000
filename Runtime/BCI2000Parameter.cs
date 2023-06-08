@@ -26,7 +26,7 @@ namespace UnityBCI2000Runtime
             if (ParametersDict.TryGetValue(parameterName, out ret))
                 return ret.Value;
             else
-                throw new Exception("This parameter does not exist.");
+                throw new Exception("This parameter does not exist. (" + parameterName + ")");
         }
         
         public void Set(string parameterName, float value)

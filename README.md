@@ -10,6 +10,8 @@ Keep in mind that at the moment both BCI2000RemoteNET and UnityBCI2000 are not f
 and are still in development, so features and API structure are subject to change at any time,
 and bugs are to be expected.
 
+BCI2000RemoteNET is included as a submodule in develop branch, use in the root of this repository:  
+`git submodule update --init --recursive`
 
 Description
 ---
