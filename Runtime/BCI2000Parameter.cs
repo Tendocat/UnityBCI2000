@@ -14,11 +14,13 @@ namespace UnityBCI2000Runtime
         
         [SerializeField] private string ConfigSectionName = "Unity";
 
-        [SerializeField] private Parameter[] Parameters;    // only for Unity inspector sake
+        [SerializeField] private Parameter[] Parameters;    // only for Unity inspector and foreach sake
 
         private Dictionary<string, Parameter> ParametersDict = new Dictionary<string, Parameter>();   // real used data container
 
         private UnityBCI2000 bci;
+        
+        private static readonly char[] trimChars =  new char[] { '\r', '\n', ' ', '>' };
 
         public float Get(string parameterName)
         {
@@ -37,9 +39,8 @@ namespace UnityBCI2000Runtime
         // dump all parameters to Operator
         public void Save()
         {
-            foreach (var pair in ParametersDict)
+            foreach (var param in Parameters)
             {
-                Parameter param = pair.Value;
                 bci.Execute("SET PARAMETER " + param.Name + " " + param.Value);
             }
         }
@@ -53,9 +54,10 @@ namespace UnityBCI2000Runtime
         // load from to Operator
         public void Load()
         {
-            foreach (var name in ParametersDict.Keys)
+            bci.readyCallback -= Load;
+            foreach (var param in Parameters)
             {
-                Load(name);
+                Load(param.Name);
             }
         }
 
@@ -63,13 +65,13 @@ namespace UnityBCI2000Runtime
         {
             Parameter param = ParametersDict[parameterName];
             string strValue;
-            bci.Execute("GET PARAMETER " + name, out strValue);
-            Debug.Log(strValue);
-            ParametersDict[name] = new Parameter(ParametersDict[name], float.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture));
+            bci.Execute("GET PARAMETER " + parameterName, out strValue);
+            strValue = strValue.Trim(trimChars);
+            ParametersDict[parameterName] = new Parameter(ParametersDict[parameterName], float.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture));
         }
 
         // Awake is called before Start
-        void Awake()
+        private void Awake()
         {
             foreach(var param in Parameters)
             {
@@ -78,6 +80,7 @@ namespace UnityBCI2000Runtime
 
             bci = BCIObject.GetComponent<UnityBCI2000>();
             bci.initParameters = GetExecutableAddParameters();
+            bci.readyCallback += Load;
         }
 
         private string[] GetExecutableAddParameters() {

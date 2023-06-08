@@ -30,6 +30,7 @@ namespace UnityBCI2000Runtime
         private List<StateVariable> states = new List<StateVariable>();
         public string[] initParameters {get; set;}
         public List<string> lastCommands {get; set;} = new List<string>();   // add commands to be called after BCI2000 is launched
+        public event Action readyCallback;  // called when BCI has finished started
 
         public enum StateType //copy this to any object which sends states in Start(), don't want to be copying this every frame
         {
@@ -146,6 +147,8 @@ namespace UnityBCI2000Runtime
             {
                 bci.Execute(command);
             }
+            
+            readyCallback?.Invoke();
         }
 
         private void OnDestroy()    // also called when OnApplicationQuit
