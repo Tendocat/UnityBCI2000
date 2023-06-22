@@ -70,6 +70,19 @@ namespace UnityBCI2000Runtime
             ParametersDict[parameterName] = new Parameter(ParametersDict[parameterName], float.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture));
         }
 
+        public string GetString(string parameterName)
+        {
+            string strValue;
+            bci.Execute("GET PARAMETER " + parameterName, out strValue);
+            strValue = strValue.Trim(trimChars);
+            return strValue;
+        }
+
+        public void SetString(string parameterName, string strValue)
+        {
+            bci.Execute("SET PARAMETER " + parameterName + " " + strValue);
+        }
+
         // Awake is called before Start
         private void Awake()
         {
