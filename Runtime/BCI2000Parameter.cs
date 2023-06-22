@@ -6,22 +6,24 @@ namespace UnityBCI2000Runtime
 {
     /*
      * This class registers BCI2000 parameters. It have to be loaded in the same scene as UnityBCI2000.
-     * Only float parameters are supported. int and string are not done for simplification.
+     * Only float parameters are supported in Unity editor for code simplification.
+     * int and string are only available through functions for a better BCI2000 built in parameters ease of access.
      */
     public class BCI2000Parameter : MonoBehaviour
     {
         [SerializeField] private GameObject BCIObject;
         
-        [SerializeField] private string ConfigSectionName = "Unity";
+        [SerializeField] private string ConfigSectionName = "Unity";    // name of the tab in BCI2000
 
         [SerializeField] private Parameter[] Parameters;    // only for Unity inspector and foreach sake
 
-        private Dictionary<string, Parameter> ParametersDict = new Dictionary<string, Parameter>();   // real used data container
+        private Dictionary<string, Parameter> ParametersDict = new Dictionary<string, Parameter>();   // optimized data container
 
         private UnityBCI2000 bci;
         
         private static readonly char[] trimChars =  new char[] { '\r', '\n', ' ', '>' };
 
+        // returns cached parameter value, use Load to sync with BCI2000
         public float Get(string parameterName)
         {
             Parameter ret;
@@ -30,13 +32,14 @@ namespace UnityBCI2000Runtime
             else
                 throw new Exception("This parameter does not exist. (" + parameterName + ")");
         }
-        
+
+        // set cached parameter value, use Save to sync with BCI2000
         public void Set(string parameterName, float value)
         {
             ParametersDict[parameterName] = new Parameter(ParametersDict[parameterName], value);
         }
 
-        // dump all parameters to Operator
+        // sync all parameters to Operator
         public void Save()
         {
             foreach (var param in Parameters)
@@ -45,13 +48,14 @@ namespace UnityBCI2000Runtime
             }
         }
 
+        // sync specified parameter to Operator
         public void Save(string parameterName)
         {
             Parameter param = ParametersDict[parameterName];
             bci.Execute("SET PARAMETER " + param.Name + " " + param.Value);
         }
 
-        // load from to Operator
+        // load all parameters from Operator
         public void Load()
         {
             bci.readyCallback -= Load;
@@ -61,6 +65,7 @@ namespace UnityBCI2000Runtime
             }
         }
 
+        // load specified parameters from Operator, value type should be float
         public void Load(string parameterName)
         {
             Parameter param = ParametersDict[parameterName];
@@ -70,6 +75,7 @@ namespace UnityBCI2000Runtime
             ParametersDict[parameterName] = new Parameter(ParametersDict[parameterName], float.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture));
         }
 
+        // returns string value of existing BCI2000 parameter
         public string GetString(string parameterName)
         {
             string strValue;
@@ -78,7 +84,23 @@ namespace UnityBCI2000Runtime
             return strValue;
         }
 
+        // modify string value of existing BCI2000 parameter
         public void SetString(string parameterName, string strValue)
+        {
+            bci.Execute("SET PARAMETER " + parameterName + " " + strValue);
+        }
+        
+        // returns int value of existing BCI2000 parameter
+        public int GetInt(string parameterName)
+        {
+            string strValue;
+            bci.Execute("GET PARAMETER " + parameterName, out strValue);
+            strValue = strValue.Trim(trimChars);
+            return int.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        // modify int value of existing BCI2000 parameter
+        public void SetInt(string parameterName, int strValue)
         {
             bci.Execute("SET PARAMETER " + parameterName + " " + strValue);
         }
@@ -96,6 +118,7 @@ namespace UnityBCI2000Runtime
             bci.readyCallback += Load;
         }
 
+        // used to set BCI2000 initialization of parameters
         private string[] GetExecutableAddParameters() {
             string [] ret = new string [ParametersDict.Count];
             int i = 0;
@@ -114,6 +137,7 @@ namespace UnityBCI2000Runtime
             return ret;
         }
 
+        // structure of a BCI2000 float parameter
         [System.Serializable]
         private struct Parameter
         {
