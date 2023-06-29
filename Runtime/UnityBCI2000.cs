@@ -15,6 +15,7 @@ namespace UnityBCI2000Runtime
         public string TelnetIp;
         public int TelnetPort;
         public bool DontStartModules;
+        public bool DontStart;
         public string Module1 = "SignalGenerator";
         public string[] Module1Args;
         public string Module2 = "DummySignalProcessing";
@@ -31,6 +32,11 @@ namespace UnityBCI2000Runtime
         public string[] initParameters {get; set;}
         public List<string> lastCommands {get; set;} = new List<string>();   // add commands to be called after BCI2000 is launched
         public event Action readyCallback;  // called when BCI has finished started
+
+        public string SubjectID { get => bci.SubjectID; set => bci.SubjectID = value; }
+        public string SessionID { get => bci.SessionID; set => bci.SessionID = value; }
+        public string RunID { get => bci.RunID; set => bci.RunID = value; }
+        public string DataDirectory { get => bci.DataDirectory; set => bci.DataDirectory = value; }
 
         public enum StateType //copy this to any object which sends states in Start(), don't want to be copying this every frame
         {
@@ -141,7 +147,8 @@ namespace UnityBCI2000Runtime
             }
 
             bci.SetConfig();
-            bci.Start();
+            if (!DontStart)
+                bci.Start();
 
             foreach (var command in lastCommands)
             {
@@ -168,6 +175,16 @@ namespace UnityBCI2000Runtime
             bool ret = bci.Execute(command);
             response = bci.Received;
             return ret;
+        }
+
+        public bool StartBCI()
+        {
+            return bci.Start();
+        }
+
+        public bool StopBCI()
+        {
+            return bci.Stop();
         }
 
         public class StateVariable
