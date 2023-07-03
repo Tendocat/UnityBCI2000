@@ -11,7 +11,6 @@ namespace UnityBCI2000Runtime
     {
         private BCI2000Remote bci = new BCI2000Remote();
         public string OperatorPath;
-        public string ParametersPath;
         public string TelnetIp;
         public int TelnetPort;
         public bool DontStartModules;
@@ -37,6 +36,17 @@ namespace UnityBCI2000Runtime
         public string SessionID { get => bci.SessionID; set => bci.SessionID = value; }
         public string RunID { get => bci.RunID; set => bci.RunID = value; }
         public string DataDirectory { get => bci.DataDirectory; set => bci.DataDirectory = value; }
+
+        [SerializeField]
+        private string parametersPath;
+        public string ParametersPath {
+            get => parametersPath; 
+            set { 
+                parametersPath = value; 
+                bci.LoadParametersRemote(parametersPath);
+                bci.SetConfig();
+            } 
+        }
 
         public enum StateType //copy this to any object which sends states in Start(), don't want to be copying this every frame
         {
@@ -121,7 +131,7 @@ namespace UnityBCI2000Runtime
                 bci.StartupModules(modules);
             }
             
-            bci.LoadParametersRemote(ParametersPath);
+            bci.LoadParametersRemote(parametersPath);
             foreach (StateVariable state in states) //Add all states to BCI2000. these can't be added before or after BCI2000 starts, and must be added here.
             {
                 switch (state.Type)

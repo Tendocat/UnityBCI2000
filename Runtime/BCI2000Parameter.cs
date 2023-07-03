@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace UnityBCI2000Runtime
 {
-    /*
-     * This class registers BCI2000 parameters. It have to be loaded in the same scene as UnityBCI2000.
-     * Only float parameters are supported in Unity editor for code simplification.
-     * int and string are only available through functions for a better BCI2000 built in parameters ease of access.
-     */
+     /// <summary>
+     ///  This class registers BCI2000 parameters. It have to be loaded in the same scene as UnityBCI2000.
+     ///  Only float parameters are supported in Unity editor for code simplification.
+     ///  int and string are only available through functions for a better BCI2000 built in parameters ease of access.
+     /// </summary>
     public class BCI2000Parameter : MonoBehaviour
     {
         [SerializeField] private GameObject BCIObject;
