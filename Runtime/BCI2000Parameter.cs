@@ -44,7 +44,7 @@ namespace UnityBCI2000Runtime
         {
             foreach (var param in Parameters)
             {
-                bci.Execute("SET PARAMETER " + param.Name + " " + param.Value);
+                bci.SetParameter(param.Name, param.Value.ToString());
             }
         }
 
@@ -52,7 +52,7 @@ namespace UnityBCI2000Runtime
         public void Save(string parameterName)
         {
             Parameter param = ParametersDict[parameterName];
-            bci.Execute("SET PARAMETER " + param.Name + " " + param.Value);
+            bci.SetParameter(parameterName, param.Value.ToString());
         }
 
         // load all parameters from Operator
@@ -70,39 +70,45 @@ namespace UnityBCI2000Runtime
         {
             Parameter param = ParametersDict[parameterName];
             string strValue;
-            bci.Execute("GET PARAMETER " + parameterName, out strValue);
-            strValue = strValue.Trim(trimChars);
-            ParametersDict[parameterName] = new Parameter(ParametersDict[parameterName], float.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture));
+            float value = 0;
+            bci.GetParameter(parameterName, out strValue);
+            try
+            {
+                value = float.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture);
+                ParametersDict[parameterName] = new Parameter(ParametersDict[parameterName], value);
+            }
+            catch(Exception e)
+            {
+                Debug.LogError(" String was: \"" + strValue + "\"\n" + e);
+            }
         }
 
         // returns string value of existing BCI2000 parameter
         public string GetString(string parameterName)
         {
             string strValue;
-            bci.Execute("GET PARAMETER " + parameterName, out strValue);
-            strValue = strValue.Trim(trimChars);
+            bci.GetParameter(parameterName, out strValue);
             return strValue;
         }
 
         // modify string value of existing BCI2000 parameter
         public void SetString(string parameterName, string strValue)
         {
-            bci.Execute("SET PARAMETER " + parameterName + " " + strValue);
+            bci.SetParameter(parameterName, strValue);
         }
         
         // returns int value of existing BCI2000 parameter
         public int GetInt(string parameterName)
         {
             string strValue;
-            bci.Execute("GET PARAMETER " + parameterName, out strValue);
-            strValue = strValue.Trim(trimChars);
+            bci.GetParameter(parameterName, out strValue);
             return int.Parse(strValue, System.Globalization.CultureInfo.InvariantCulture);
         }
 
         // modify int value of existing BCI2000 parameter
         public void SetInt(string parameterName, int strValue)
         {
-            bci.Execute("SET PARAMETER " + parameterName + " " + strValue);
+            bci.SetParameter(parameterName, strValue.ToString());
         }
 
         // Awake is called before Start

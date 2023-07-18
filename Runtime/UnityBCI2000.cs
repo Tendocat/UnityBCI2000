@@ -33,8 +33,48 @@ namespace UnityBCI2000Runtime
         public event Action readyCallback;  // called when BCI has finished started
 
         public string SubjectID { get => bci.SubjectID; set => bci.SubjectID = value; }
-        public string SessionID { get => bci.SessionID; set => bci.SessionID = value; }
-        public string RunID { get => bci.RunID; set => bci.RunID = value; }
+        public int SessionID
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(bci.SessionID))
+                {
+                    string outStr = "";
+                    bci.GetParameter("SubjectSession", out outStr);
+                    bci.SessionID = outStr;
+                    if (String.IsNullOrEmpty(bci.SessionID))
+                    {
+                        SessionID = 1;
+                    }
+                }
+                return int.Parse(bci.SessionID, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            set
+            {
+                bci.SessionID = value.ToString("000");
+            }
+        }
+        public int RunID
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(bci.RunID))
+                {
+                    string outStr = "";
+                    bci.GetParameter("SubjectRun", out outStr);
+                    bci.RunID = outStr;
+                    if (String.IsNullOrEmpty(bci.RunID))
+                    {
+                        RunID = 1;
+                    }
+                }
+                return int.Parse(bci.RunID, System.Globalization.CultureInfo.InvariantCulture);
+            }
+            set
+            {
+                bci.RunID = value.ToString("00");
+            }
+        }
         public string DataDirectory { get => bci.DataDirectory; set => bci.DataDirectory = value; }
 
         [SerializeField]
@@ -185,6 +225,16 @@ namespace UnityBCI2000Runtime
             bool ret = bci.Execute(command);
             response = bci.Received;
             return ret;
+        }
+        
+        public bool SetParameter(string name, string value)
+        {
+            return bci.SetParameter(name, value);
+        }
+
+        public bool GetParameter(string name, out string outValue)
+        {
+            return bci.GetParameter(name, out outValue);
         }
 
         public bool StartBCI()
