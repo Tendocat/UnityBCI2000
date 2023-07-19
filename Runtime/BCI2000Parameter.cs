@@ -79,7 +79,7 @@ namespace UnityBCI2000Runtime
             }
             catch(Exception e)
             {
-                Debug.LogError(" String was: \"" + strValue + "\"\n" + e);
+                Debug.LogError(" String for the parameter <" + parameterName + "> was: \"" + strValue + "\"\n" + e);
             }
         }
 

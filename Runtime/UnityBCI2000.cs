@@ -47,7 +47,15 @@ namespace UnityBCI2000Runtime
                         SessionID = 1;
                     }
                 }
-                return int.Parse(bci.SessionID, System.Globalization.CultureInfo.InvariantCulture);
+                try
+                {
+                    return int.Parse(bci.SessionID, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch(Exception e)
+                {
+                    Debug.LogError(" String was: \"" + bci.SessionID + "\"\n" + e);
+                }
+                return 0;
             }
             set
             {
@@ -68,7 +76,15 @@ namespace UnityBCI2000Runtime
                         RunID = 1;
                     }
                 }
-                return int.Parse(bci.RunID, System.Globalization.CultureInfo.InvariantCulture);
+                try
+                {
+                    return int.Parse(bci.RunID, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                catch(Exception e)
+                {
+                    Debug.LogError(" String was: \"" + bci.RunID + "\"\n" + e);
+                }
+                return 0;
             }
             set
             {
